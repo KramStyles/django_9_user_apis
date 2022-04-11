@@ -37,6 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Apps
+    'todos.apps.TodosConfig',
+    'authentication.apps.AuthenticationConfig',
+
+    # PIP INSTALLS
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
