@@ -1,3 +1,7 @@
 from django.db import models
 
-# Create your models here.
+from helpers.models import TrackingModels
+
+
+class User(TrackingModels):
+    pass
