@@ -18,3 +18,5 @@ class LoginSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password', 'token')
+
+        # read_only_fields = ['token']
