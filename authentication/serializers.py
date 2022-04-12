@@ -12,3 +12,9 @@ class RegisterSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+
+class LoginSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'password', 'token')
