@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework.generics import CreateAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 
@@ -10,9 +11,11 @@ from .models import Todo
 class ListCreateTodoApi(ListCreateAPIView):
     serializer_class = TodoSerializer
     permission_classes = (IsAuthenticated, )
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     filterset_fields = ['id', 'title', 'is_finished', 'desc']
+    search_fields = ['id', 'title', 'is_finished', 'desc']
+    ordering_fields = ['id', 'title', 'is_finished', 'desc']
 
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
