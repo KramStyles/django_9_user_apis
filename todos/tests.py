@@ -3,6 +3,7 @@ import time
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
+from .models import Todo
 
 class TestTodoList(APITestCase):
     start = None
@@ -23,10 +24,13 @@ class TestTodoList(APITestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_to_create_todo_with_authentication(self):
+        total_todos = Todo.objects.all().count()
         self.authenticate_user()
         sample_todo = {'title': 'hello', 'desc': 'testing'}
         response = self.client.post(reverse('list-create-todo'), sample_todo)
+
         self.assertEqual(response.status_code, 201)
+        self.assertGreater(Todo.objects.all().count(), total_todos)
 
     @classmethod
     def tearDownClass(cls):
