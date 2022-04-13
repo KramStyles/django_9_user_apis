@@ -27,7 +27,7 @@ class TestModels(APITestCase):
         self.assertIsInstance(user, User)
 
     def test_for_token(self):
-        self.assertEqual(User().token, 'token')
+        self.assertGreater(len(User().token), 50)
 
     def test_if_username_and_email_are_missing(self):
         with self.assertRaises(TypeError):
@@ -48,4 +48,4 @@ class TestModels(APITestCase):
 
     @classmethod
     def tearDownClass(cls):
-        print("Time taken to run this:", time() - cls.start_time)
+        print("Total Time taken to test Models:", time() - cls.start_time)
