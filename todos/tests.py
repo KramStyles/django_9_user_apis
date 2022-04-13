@@ -36,7 +36,7 @@ class TestTodoList(APITestCase):
     def test_to_get_all_todos(self):
         self.authenticate_user()
         response = self.client.get(reverse('list-create-todo'))
-        
+
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data['results'], list)
 
