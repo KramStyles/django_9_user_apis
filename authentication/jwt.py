@@ -15,8 +15,11 @@ class JWTAuthentication(BaseAuthentication):
             if len(auth_token) != 2: raise exceptions.AuthenticationFailed('Invalid User Token')
 
             token = auth_token[1]
-        else: 
-            token = request.COOKIES['jwt']
+        else:
+            if request.COOKIES: 
+                token = request.COOKIES['jwt']
+            else:
+                raise exceptions.AuthenticationFailed('Cookies and Token missing')
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')

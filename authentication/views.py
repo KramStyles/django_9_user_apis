@@ -19,7 +19,9 @@ class AuthUserApiView(GenericAPIView):
 
 
 class RegisterAPIView(GenericAPIView):
-    # queryset = User.objects.all()
+    # Prevents authentication on this page
+    authentication_classes = []
+
     serializer_class = RegisterSerializer
 
     def post(self, request):
@@ -32,6 +34,7 @@ class RegisterAPIView(GenericAPIView):
 
 
 class LoginAPIView(GenericAPIView):
+    authentication_classes = []
     serializer_class = LoginSerializer
 
     def post(self, request):
