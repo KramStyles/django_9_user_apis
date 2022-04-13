@@ -15,7 +15,7 @@ class AuthUserApiView(GenericAPIView):
         user = request.user
         serializer = RegisterSerializer(user)
 
-        return Response({'user': serializer.data}, status=203)
+        return Response({'user': serializer.data})
 
 
 class RegisterAPIView(GenericAPIView):
@@ -43,5 +43,8 @@ class LoginAPIView(GenericAPIView):
 
         if user:
             serializer = self.serializer_class(user)
-            return Response(serializer.data, status=204)
+            resp = Response(serializer.data, status=204)
+            resp.set_cookie(key='jwt', value=serializer.data['token'], httponly=True)
+            return resp
+
         return Response({'message': 'Invalid Credentials. Try again'}, status=404)
