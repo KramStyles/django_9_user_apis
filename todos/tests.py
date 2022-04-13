@@ -40,6 +40,9 @@ class TestTodoList(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data['results'], list)
 
+    def test_to_do_nothing(self):
+        pass
+
     @classmethod
     def tearDownClass(cls):
         print('Total time to test Authentication:', time.time() - cls.start)
