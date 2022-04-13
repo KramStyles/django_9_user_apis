@@ -1,8 +1,8 @@
-from posixpath import isabs
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import TodoSerializer
+from .models import Todo
 
 
 class CreateTodoAPIView(CreateAPIView):
@@ -11,3 +11,11 @@ class CreateTodoAPIView(CreateAPIView):
 
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
+
+class TodoListAPIView(ListAPIView):
+    serializer_class = TodoSerializer
+    permission_classes = (IsAuthenticated, )
+    
+
+    def get_queryset(self):
+        return Todo.objects.filter(owner=self.request.user)
