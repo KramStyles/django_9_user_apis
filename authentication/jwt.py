@@ -16,7 +16,7 @@ class JWTAuthentication(BaseAuthentication):
 
             token = auth_token[1]
         else:
-            if request.COOKIES: 
+            if 'jwt' in request.COOKIES: 
                 token = request.COOKIES['jwt']
             else:
                 raise exceptions.AuthenticationFailed('Cookies and Token missing')
