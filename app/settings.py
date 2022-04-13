@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     # PIP INSTALLS
     'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

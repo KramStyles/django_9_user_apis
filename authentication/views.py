@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate
-from rest_framework import permissions
+from rest_framework import permissions, exceptions
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
@@ -38,6 +38,11 @@ class LoginAPIView(GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
+        if not request.data.get('email'):
+            raise exceptions.NotAcceptable('Email is Missing!')
+
+        if not request.data.get('password'):
+            raise exceptions.NotAcceptable('Password is required!')
 
         email = request.data['email']
         password = request.data['password']
