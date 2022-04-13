@@ -31,6 +31,14 @@ class TestTodoList(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertGreater(Todo.objects.all().count(), total_todos)
+        self.assertEqual(response.data['title'], 'hello')
+
+    def test_to_get_all_todos(self):
+        self.authenticate_user()
+        response = self.client.get(reverse('list-create-todo'))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.data['results'], list)
 
     @classmethod
     def tearDownClass(cls):
