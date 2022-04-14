@@ -4,12 +4,12 @@ from rest_framework import permissions, exceptions
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
-from authentication.serializers import RegisterSerializer, LoginSerializer
+from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer
 from .models import User
 
 
 class AuthUserApiView(GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated, )
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         user = request.user
@@ -56,3 +56,10 @@ class LoginAPIView(GenericAPIView):
             return resp
 
         return Response({'message': 'Invalid Credentials. Try again'}, status=404)
+
+
+class ResetPasswordAPIView(GenericAPIView):
+    serializer_class = MyResetPasswordSerializer
+
+    def post(self, request):
+        pass

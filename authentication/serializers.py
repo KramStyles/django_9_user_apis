@@ -1,3 +1,5 @@
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils import encoding, http
 from rest_framework import serializers
 
 from authentication.models import User
@@ -20,3 +22,22 @@ class LoginSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('email', 'password', 'token')
 
         read_only_fields = ['token']
+
+
+class MyResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    class Meta:
+        fields = ['email']
+
+    def validate(self, attrs):
+        try:
+            email = attrs.get('email', '')
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                uidb = http.urlsafe_base64_encode(user.id)
+                token = PasswordResetTokenGenerator().make_token(user)
+            pass
+        except Exception as err:
+            pass
+        return super().validate(attrs)
