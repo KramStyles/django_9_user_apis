@@ -4,7 +4,7 @@ from rest_framework import permissions, exceptions
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
-from authentication.serializers import RegisterSerializer, LoginSerializer
+from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer
 from .models import User
 
 
@@ -59,5 +59,7 @@ class LoginAPIView(GenericAPIView):
 
 
 class ResetPasswordAPIView(GenericAPIView):
+    serializer_class = MyResetPasswordSerializer
+
     def post(self, request):
         pass
