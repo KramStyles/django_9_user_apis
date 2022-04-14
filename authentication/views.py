@@ -9,7 +9,7 @@ from .models import User
 
 
 class AuthUserApiView(GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated, )
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         user = request.user
@@ -56,3 +56,8 @@ class LoginAPIView(GenericAPIView):
             return resp
 
         return Response({'message': 'Invalid Credentials. Try again'}, status=404)
+
+
+class ResetPasswordAPIView(GenericAPIView):
+    def post(self, request):
+        pass

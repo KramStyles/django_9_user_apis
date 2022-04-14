@@ -20,3 +20,10 @@ class LoginSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('email', 'password', 'token')
 
         read_only_fields = ['token']
+
+
+class MyResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    class Meta:
+        fields = ['email']
