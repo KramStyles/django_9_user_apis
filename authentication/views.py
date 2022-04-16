@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import reverse
 import jwt
-from rest_framework import permissions, exceptions
+from rest_framework import permissions, exceptions, status
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
@@ -29,11 +29,17 @@ class VerifyEmailApiView(GenericAPIView):
         token = request.GET.get('token')
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
-            username = payload['username']
-            print('PAYLOAD', payload)
-            return Response(payload, status=204)
-        except Exception as err:
-            raise jwt.DecodeError(err)
+            print(payload)
+            user = User.objects.get(username=payload['username'])
+
+            user.email_verified = True
+            user.save()
+
+            return Response({'message': 'Successfully Verified Email'}, status=200)
+        except jwt.ExpiredSignatureError as err:
+            return Response({'message': 'Link is expired', 'err': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as err:
+            return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
 
 
 class RegisterAPIView(GenericAPIView):
