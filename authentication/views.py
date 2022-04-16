@@ -51,7 +51,6 @@ class RegisterAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
 
-
         if serializer.is_valid():
             serializer.save()
             token = serializer.data['token']
@@ -97,6 +96,28 @@ class LoginAPIView(GenericAPIView):
 
 class ResetPasswordAPIView(GenericAPIView):
     serializer_class = MyResetPasswordSerializer
+    authentication_classes = []
 
     def post(self, request):
-        pass
+        data = {'request': request, 'data': request.data}
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            return Response({'msg': 'Reset Link Sent', 'data': serializer.data}, status=status.HTTP_202_ACCEPTED)
+        return Response({'msg': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangePasswordApiView(GenericAPIView):
+    authentication_classes = []
+
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            print(payload)
+            user = User.objects.get(username=payload['username'])
+
+            return Response({'message': 'REACHED HERE. GOOD'}, status=200)
+        except jwt.ExpiredSignatureError as err:
+            return Response({'message': 'Link is expired', 'err': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as err:
+            return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
