@@ -1,11 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import reverse
 from django.contrib.auth import authenticate
+from django.contrib.sites.shortcuts import get_current_site
 from rest_framework import permissions, exceptions
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
 from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer
 from .models import User
+from .utils import Util
 
 
 class AuthUserApiView(GenericAPIView):
@@ -18,6 +20,11 @@ class AuthUserApiView(GenericAPIView):
         return Response({'user': serializer.data})
 
 
+class VerifyEmailApiView(GenericAPIView):
+    def get(self, request):
+        pass
+
+
 class RegisterAPIView(GenericAPIView):
     # Prevents authentication on this page
     authentication_classes = []
@@ -26,9 +33,19 @@ class RegisterAPIView(GenericAPIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
+        token = request.data['csrfmiddlewaretoken']
 
+        relative_link = reverse('email-verify')
         if serializer.is_valid():
+
+            data = {
+                'subject': 'Registration Complete',
+                'body': f"This is a Verification message. You have registered in <a href='{get_current_site(request).domain}{relative_link}{token}'>Homepage</a>. <br> Click to visit",
+                'receiver': request.data['email']
+            }
+            # Util.send_email(data)
             serializer.save()
+            print('TOKEN', serializer.data['token'])
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
