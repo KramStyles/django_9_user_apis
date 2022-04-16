@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 
 import django_on_heroku
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -147,5 +150,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
+
+
+
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+
