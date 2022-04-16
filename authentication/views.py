@@ -1,6 +1,8 @@
-from django.shortcuts import reverse
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.sites.shortcuts import get_current_site
+from django.shortcuts import reverse
+import jwt
 from rest_framework import permissions, exceptions
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
@@ -21,8 +23,17 @@ class AuthUserApiView(GenericAPIView):
 
 
 class VerifyEmailApiView(GenericAPIView):
+    authentication_classes = []
+
     def get(self, request):
-        pass
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            username = payload['username']
+            print('PAYLOAD', payload)
+            return Response(payload, status=204)
+        except Exception as err:
+            raise jwt.DecodeError(err)
 
 
 class RegisterAPIView(GenericAPIView):
@@ -33,20 +44,23 @@ class RegisterAPIView(GenericAPIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        token = request.data['csrfmiddlewaretoken']
 
-        relative_link = reverse('email-verify')
+
         if serializer.is_valid():
+            serializer.save()
+            token = serializer.data['token']
 
+            relative_link = reverse('email-verify')
             data = {
                 'subject': 'Registration Complete',
-                'body': f"This is a Verification message. You have registered in <a href='{get_current_site(request).domain}{relative_link}{token}'>Homepage</a>. <br> Click to visit",
+                'body': f"This is a Verification message. http://{get_current_site(request).domain}{relative_link}?token={token} Click to visit",
                 'receiver': request.data['email']
             }
-            # Util.send_email(data)
-            serializer.save()
-            print('TOKEN', serializer.data['token'])
-            return Response(serializer.data, status=201)
+
+            Util.send_email(data)
+
+            resp = Response(serializer.data, status=201)
+            return resp
         return Response(serializer.errors, status=400)
 
 
