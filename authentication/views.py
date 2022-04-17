@@ -124,10 +124,23 @@ class ChangePasswordApiView(GenericAPIView):
 
 
 class SetNewPassword(GenericAPIView):
+    authentication_classes = []
     serializer_class = SetNewPasswordSerializer
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
 
         serializer.is_valid(raise_exception=True)
-        return Response({'success': True, 'msg': 'Password Reset'}, status=status.HTTP_202_ACCEPTED)
+        token = request.data['token']
+        password = request.data['password']
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            user = User.objects.get(username=payload['username'])
+
+            user.set_password(password)
+            user.save()
+            return Response({'success': True, 'msg': 'Password Reset'}, status=status.HTTP_202_ACCEPTED)
+        except jwt.ExpiredSignatureError as err:
+            return Response({'message': 'Link is expired', 'err': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as err:
+            return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
