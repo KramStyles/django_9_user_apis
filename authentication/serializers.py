@@ -35,7 +35,6 @@ class MyResetPasswordSerializer(serializers.Serializer):
         fields = ['email']
 
     def validate(self, attrs):
-        print('ATTR', attrs)
         try:
             email = attrs.get('email', '')
             if User.objects.filter(email=email).exists():
@@ -52,8 +51,19 @@ class MyResetPasswordSerializer(serializers.Serializer):
 
                 Util.send_email(data)
 
-            pass
+
         except Exception as err:
             print('WAHALA', err)
             raise exceptions
+        return super().validate(attrs)
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=6, max_length=100, write_only=True)
+    token = serializers.CharField(min_length=6, write_only=True)
+
+    class Meta:
+        fields = ['password', 'token']
+
+    def validate(self, attrs):
         return super().validate(attrs)
