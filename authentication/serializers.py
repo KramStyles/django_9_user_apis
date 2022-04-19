@@ -1,3 +1,5 @@
+from random import randint
+
 from django.conf import settings
 from django.shortcuts import reverse
 import jwt
@@ -34,18 +36,24 @@ class MyResetPasswordSerializer(serializers.Serializer):
     class Meta:
         fields = ['email']
 
+    def generate_otp(self):
+        return randint(1000, 9999)
+
     def validate(self, attrs):
         try:
             email = attrs.get('email', '')
             if User.objects.filter(email=email).exists():
                 user = User.objects.get(email=email)
 
+                user.otp = self.generate_otp()
+                user.save()
+
                 token = user.token
 
                 relative_link = reverse('reset-password')
                 data = {
                     'subject': 'Reset Link',
-                    'body': f"This is a message to reset your password. {settings.BASE_URL}{relative_link}?token={token} ",
+                    'body': f"This is a message to reset your password. Your token is: {user.otp} and the link to click is: {settings.BASE_URL}{relative_link}?token={token} ",
                     'receiver': email
                 }
 
@@ -64,6 +72,12 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
     class Meta:
         fields = ['password', 'token']
+
+    def validate(self, attrs):
+        return super().validate(attrs)
+
+class ValidateOTPSerializer(serializers.Serializer):
+    otp = serializers.IntegerField()
 
     def validate(self, attrs):
         return super().validate(attrs)
