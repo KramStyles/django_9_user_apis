@@ -7,7 +7,7 @@ from rest_framework import permissions, exceptions, status
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
-from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer, SetNewPasswordSerializer
+from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer, SetNewPasswordSerializer, ValidateOTPSerializer
 from .models import User
 from .utils import Util
 
@@ -108,6 +108,7 @@ class ResetPasswordAPIView(GenericAPIView):
 
 class ChangePasswordApiView(GenericAPIView):
     authentication_classes = []
+    serializer_class = ValidateOTPSerializer
 
     def get(self, request):
         token = request.GET.get('token')
@@ -116,11 +117,14 @@ class ChangePasswordApiView(GenericAPIView):
             print(payload)
             user = User.objects.get(username=payload['username'])
 
-            return Response({'message': 'REACHED HERE. GOOD', 'user': user.username}, status=200)
+            return Response({'message': 'Token is Valid. Enter OTP to reset your password', 'user': user.username}, status=200)
         except jwt.ExpiredSignatureError as err:
             return Response({'message': 'Link is expired', 'err': str(err)}, status=status.HTTP_400_BAD_REQUEST)
         except jwt.exceptions.DecodeError as err:
             return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
+
+    def post(self, request):
+        pass
 
 
 class SetNewPassword(GenericAPIView):
