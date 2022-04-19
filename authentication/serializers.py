@@ -1,8 +1,10 @@
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils import encoding, http
-from rest_framework import serializers
+from django.conf import settings
+from django.shortcuts import reverse
+import jwt
+from rest_framework import serializers, exceptions
 
 from authentication.models import User
+from .utils import Util
 
 
 class RegisterSerializer(serializers.HyperlinkedModelSerializer):
@@ -37,9 +39,31 @@ class MyResetPasswordSerializer(serializers.Serializer):
             email = attrs.get('email', '')
             if User.objects.filter(email=email).exists():
                 user = User.objects.get(email=email)
-                uidb = http.urlsafe_base64_encode(user.id)
-                token = PasswordResetTokenGenerator().make_token(user)
-            pass
+
+                token = user.token
+
+                relative_link = reverse('reset-password')
+                data = {
+                    'subject': 'Reset Link',
+                    'body': f"This is a message to reset your password. {settings.BASE_URL}{relative_link}?token={token} ",
+                    'receiver': email
+                }
+
+                Util.send_email(data)
+
+
         except Exception as err:
-            pass
+            print('WAHALA', err)
+            raise exceptions
+        return super().validate(attrs)
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=1, max_length=100, write_only=True)
+    token = serializers.CharField(min_length=6, write_only=True)
+
+    class Meta:
+        fields = ['password', 'token']
+
+    def validate(self, attrs):
         return super().validate(attrs)

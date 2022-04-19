@@ -7,7 +7,7 @@ from rest_framework import permissions, exceptions, status
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 
-from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer
+from authentication.serializers import RegisterSerializer, LoginSerializer, MyResetPasswordSerializer, SetNewPasswordSerializer
 from .models import User
 from .utils import Util
 
@@ -50,7 +50,6 @@ class RegisterAPIView(GenericAPIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-
 
         if serializer.is_valid():
             serializer.save()
@@ -97,6 +96,51 @@ class LoginAPIView(GenericAPIView):
 
 class ResetPasswordAPIView(GenericAPIView):
     serializer_class = MyResetPasswordSerializer
+    authentication_classes = []
 
     def post(self, request):
-        pass
+        data = {'request': request, 'data': request.data}
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            return Response({'msg': 'Reset Link Sent', 'data': serializer.data}, status=status.HTTP_202_ACCEPTED)
+        return Response({'msg': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangePasswordApiView(GenericAPIView):
+    authentication_classes = []
+
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            print(payload)
+            user = User.objects.get(username=payload['username'])
+
+            return Response({'message': 'REACHED HERE. GOOD', 'user': user.username}, status=200)
+        except jwt.ExpiredSignatureError as err:
+            return Response({'message': 'Link is expired', 'err': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as err:
+            return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
+
+
+class SetNewPassword(GenericAPIView):
+    authentication_classes = []
+    serializer_class = SetNewPasswordSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        token = request.data['token']
+        password = request.data['password']
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            user = User.objects.get(username=payload['username'])
+
+            user.set_password(password)
+            user.save()
+            return Response({'success': True, 'msg': 'Password Reset'}, status=status.HTTP_202_ACCEPTED)
+        except jwt.ExpiredSignatureError as err:
+            return Response({'message': 'Link is expired', 'err': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as err:
+            return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
