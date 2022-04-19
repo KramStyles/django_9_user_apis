@@ -114,7 +114,6 @@ class ChangePasswordApiView(GenericAPIView):
         token = request.GET.get('token')
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
-            print(payload)
             user = User.objects.get(username=payload['username'])
 
             return Response({'message': 'Token is Valid. Enter OTP to reset your password', 'user': user.username}, status=200)
@@ -124,8 +123,23 @@ class ChangePasswordApiView(GenericAPIView):
             return Response({'message': 'Invalid Token', 'err': str(err)}, status=status.HTTP_409_CONFLICT)
 
     def post(self, request):
-        pass
+        serializer = self.serializer_class(data=request.data)
 
+        if serializer.is_valid():
+            otp = request.data['otp']
+            token = request.GET.get('token')
+
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            user = User.objects.get(username=payload['username'])
+
+            print(user.otp, otp)
+            
+            if user.otp == otp:
+                print('correct otp')
+            else:
+                print('This is right here')
+            # return Response({'message': 'Invalid Token'}, status=status.HTTP_100_CONTINUE)
+        return Response({'message': 'Only Numbers allowed'}, status=status.HTTP_409_CONFLICT)
 
 class SetNewPassword(GenericAPIView):
     authentication_classes = []
