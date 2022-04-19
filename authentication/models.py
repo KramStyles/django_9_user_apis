@@ -80,6 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin, TrackingModels):
         _('email_verified'), default=False,
         help_text=_('Checks if user email is verified')
     )
+    otp = models.IntegerField(default=0000, blank=True, null=True)
 
     date_joined = models.DateTimeField(_('Date Joined'), auto_now=True)
 
