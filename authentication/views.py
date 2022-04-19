@@ -134,15 +134,18 @@ class ChangePasswordApiView(GenericAPIView):
 
 
             if user.otp == otp:
-                return Response({'message': 'OTP Accepted', 'link': settings.BASE_URL+reverse('reset-change-password')}, status=status.HTTP_202_ACCEPTED)
+                return Response({'message': 'OTP Accepted', 'link': settings.BASE_URL+reverse('reset-change-password')+f'?token={token}'}, status=status.HTTP_202_ACCEPTED)
             else:
                 return Response({'message': 'Incorrect OTP'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            # return Response({'message': 'Invalid Token'}, status=status.HTTP_100_CONTINUE)
         return Response({'message': 'Only Numbers allowed'}, status=status.HTTP_409_CONFLICT)
 
 class SetNewPassword(GenericAPIView):
     authentication_classes = []
     serializer_class = SetNewPasswordSerializer
+
+    def get(self, request):
+        token = request.GET.get('token')
+        return Response({'password': '', 'token': token})
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
