@@ -126,18 +126,17 @@ class ChangePasswordApiView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            otp = request.data['otp']
+            otp = int(request.data['otp'])
             token = request.GET.get('token')
 
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
             user = User.objects.get(username=payload['username'])
 
-            print(user.otp, otp)
-            
+
             if user.otp == otp:
-                print('correct otp')
+                return Response({'message': 'OTP Accepted', 'link': settings.BASE_URL+reverse('reset-change-password')}, status=status.HTTP_202_ACCEPTED)
             else:
-                print('This is right here')
+                return Response({'message': 'Incorrect OTP'}, status=status.HTTP_406_NOT_ACCEPTABLE)
             # return Response({'message': 'Invalid Token'}, status=status.HTTP_100_CONTINUE)
         return Response({'message': 'Only Numbers allowed'}, status=status.HTTP_409_CONFLICT)
 
